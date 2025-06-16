@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * InputBox nâng cấp:
  * - Placeholder tùy chỉnh qua props
  * - Validation: input trống sẽ báo lỗi
+ * - Auto-focus khi render
+ * - Debounce khi nhập liệu
  * - Giới hạn tối đa 50 ký tự
  * - Styling đẹp hơn
  * - Callback onInputChange khi nhập dữ liệu
@@ -11,40 +13,61 @@ import React, { useState } from 'react';
 function InputBox({
   value,
   onChange,
-  placeholder = 'Nhập nội dung...',
-  onInputChange, // callback xử lý dữ liệu khi nhập
+  placeholder = 'Nhập nội dung...'
 }) {
+  const [inputValue, setInputValue] = useState(value || '');
   const [error, setError] = useState('');
+  const inputRef = useRef(null);
+  const debounceTimeout = useRef();
 
-  // Xử lý khi người dùng nhập
-  const handleChange = (e) => {
-    let val = e.target.value;
-    // Giới hạn 50 ký tự
-    if (val.length > 50) {
-      val = val.slice(0, 50);
+  // Auto-focus khi render
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
-    // Validation: không được để trống
-    if (val.trim() === '') {
+  }, []);
+
+  // Khi value từ props thay đổi, cập nhật local state
+  useEffect(() => {
+    setInputValue(value || '');
+  }, [value]);
+
+  // Debounce cập nhật state cha
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      onChange(inputValue);
+    }, 400); // 400ms debounce
+    return () => clearTimeout(debounceTimeout.current);
+    // eslint-disable-next-line
+  }, [inputValue]);
+
+  // Validation khi blur hoặc khi inputValue thay đổi
+  const handleBlur = () => {
+    if (inputValue.trim() === '') {
       setError('Vui lòng nhập nội dung!');
     } else {
       setError('');
     }
-    onChange(val); // callback cập nhật state cha
-    if (onInputChange) onInputChange(val); // callback xử lý dữ liệu
   };
 
-  // Khi blur (mất focus), kiểm tra trống
-  const handleBlur = () => {
-    if (value.trim() === '') {
+  // Xử lý khi người dùng nhập
+  const handleChange = (e) => {
+    let val = e.target.value;
+    setInputValue(val);
+    if (val.trim() === '') {
       setError('Vui lòng nhập nội dung!');
+    } else {
+      setError('');
     }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '60%' }}>
       <input
+        ref={inputRef}
         type="text"
-        value={value}
+        value={inputValue}
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
@@ -68,7 +91,7 @@ function InputBox({
       )}
       {/* Hiển thị số ký tự đã nhập */}
       <span style={{ fontSize: '12px', color: '#888', marginTop: '2px', alignSelf: 'flex-end' }}>
-        {value.length}/50 ký tự
+        {inputValue.length}/50 ký tự
       </span>
     </div>
   );
