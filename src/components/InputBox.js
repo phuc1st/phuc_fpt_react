@@ -6,6 +6,9 @@ import React, { useState, useEffect, useRef } from 'react';
  * - Validation: input trống sẽ báo lỗi
  * - Auto-focus khi render
  * - Debounce khi nhập liệu
+ * - Giới hạn tối đa 50 ký tự
+ * - Styling đẹp hơn
+ * - Callback onInputChange khi nhập dữ liệu
  */
 function InputBox({
   value,
