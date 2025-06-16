@@ -16,9 +16,14 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {/* Ô input và button */}
+        {/* Ô input và button */} 
         <div style={{ marginBottom: '20px' }}>
-          <InputBox value={inputValue} onChange={setInputValue} />
+        <InputBox
+          value={inputValue}
+          onChange={setInputValue}
+          placeholder="Nhập tên của bạn..."
+          onInputChange={(val) => { /* Xử lý thêm nếu cần */ }}
+        />
           <DisplayButton onClick={handleDisplay} />
         </div>
         {/* Hiển thị nội dung */}
